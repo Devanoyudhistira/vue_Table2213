@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+@theme {
+    --font-work : "Work Sans";
+    --font-inter : "Inter";
+}

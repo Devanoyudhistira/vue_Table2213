@@ -3,18 +3,21 @@ import supabase from './library/supabase';
 import Tabledata from './components/Tabledata.vue';
 import Tablehead from './components/Tablehead.vue';
 import Tablerow from './components/Tablerow.vue';
+import Navbar from './components/navbar.vue';
 export default {
   components: {
     Tabledata,
     Tablehead,
-    Tablerow
+    Tablerow,
+    Navbar,
   },
   data() {
     return {
       nama: 'devano',
       data: null,
       userdata: null,
-      userform: false
+      userform: false,
+      searchkey: "",
     }
   },
   methods: {
@@ -25,8 +28,6 @@ export default {
     async getuser() {
       const { data, error } = await supabase.from("Users").select()
       this.userdata = data
-      // console.log(error)
-      // console.log(data)
     },
     openform() {
       this.userform = true
@@ -44,21 +45,43 @@ export default {
         console.log(error)
         return;
       }
+      console.log(data)
       const { data: userdata, error: insertError } = await supabase
         .from('Users')
         .insert({
           name: this.$refs.name.value,
           role: "staff",
           image: `belum ada`,
-          uuid: data.id,
-          admin:true          
+          uuid: data.user.id,
+          admin: true
         }).single().select()
       if (insertError) {
         console.log(insertError)
         return;
       }
+      this.userdata.push(userdata)
       console.log(userdata)
-    }
+    },
+    async deleteuser(target,uuid) {
+      console.log(uuid)
+      const { error:autherror } = await supabase.auth.admin.deleteUser(
+        uuid
+      )
+      if(autherror){
+        console.log(autherror)
+        return
+      }
+      const { count, data, error:deleterror } = await supabase.from("Users").delete().eq('id', target).single().select();
+      if (deleterror) {
+        console.log(deleteerror)
+        return
+      }
+      console.log(data)
+      // const deleteresult = this.userdata.filter(e => e.id !== target)
+    },
+
+  },
+  watch: {
   },
   mounted() {
     this.getdata()
@@ -69,6 +92,11 @@ export default {
       return this.data
     },
     datauser() {
+      if (this.searchkey.length > 4) {
+        return this.userdata.filter(e => {
+          return e.name.toLowerCase().includes(this.searchkey)
+        })
+      }
       return this.userdata
     },
     dataloaded() {
@@ -76,15 +104,15 @@ export default {
         return true
       }
       return false
-    }
+    },
   }
 }
 </script>
 
 <template>
-  <main v-if="dataloaded" class="w-screen h-screen flex flex-col items-center justify-center gap-4">
-    <div v-show="userform">
-      <form class="flex flex-col gap-3" @submit.prevent="newuser">
+  <main v-if="dataloaded" class="w-screen h-screen flex flex-col px-1">
+    <Navbar />
+    <form class="flex mt-20 flex-col gap-3" @submit.prevent="newuser">
         <label for="name">
           <h1>name:</h1>
           <input ref="name" type="text" name="name" id="name">
@@ -107,39 +135,38 @@ export default {
         </label>
         <button type="submit"> Confirm </button>
       </form>
+
+
+    <div class="mt-16 w-full h-max flex items-center justify-between">
+      <h1 class=" text-4xl font-work font-medium">Users Data</h1>
+      <label for="search" class="flex gap-2 mr-5">
+        <h1 class="font-inter font-medium text-2xl tracking-wider text-blue-400">search</h1>
+        <input type="text" v-model="searchkey" id="search" class="border-2 border-sky-500 font-work rounded-md" />
+      </label>
     </div>
-    <table>
-      <Tablerow>
-        <Tablehead>id</Tablehead>
-        <Tablehead>product</Tablehead>
-        <Tablehead>price</Tablehead>
-        <Tablehead>edit</Tablehead>
-      </Tablerow>
-      <Tablerow v-for="data in productdata">
-        <Tabledata> {{ data.id }} </Tabledata>
-        <Tabledata>{{ data.name }}</Tabledata>
-        <Tabledata> {{ data.price }} </Tabledata>
-        <Tabledata> <button class="bg-blue-700 px-1 py-1 w-full text-center"> edit </button> </Tabledata>
-      </Tablerow>
-    </table>
-    <table>
+
+    <table class="font-work ">
       <Tablerow>
         <Tablehead>user id</Tablehead>
         <Tablehead>name</Tablehead>
         <Tablehead>status</Tablehead>
         <Tablehead> role</Tablehead>
         <Tablehead>edit</Tablehead>
+        <Tablehead>Delete</Tablehead>
       </Tablerow>
       <Tablerow v-for="user in datauser">
         <Tabledata> {{ user.id }} </Tabledata>
         <Tabledata>{{ user.name }}</Tabledata>
         <Tabledata> {{ user.admin ? 'admin' : 'user' }} </Tabledata>
         <Tabledata> {{ user.role }} </Tabledata>
-        <Tabledata> <button class="bg-blue-700 px-1 py-1"> edit </button> </Tabledata>
+        <Tabledata> <button class="bg-sky-400 px-4 py-0.5 rounded-md "> Edit </button> </Tabledata>
+        <Tabledata> <button @click="() => deleteuser(user.id,user.uuid)" class="bg-red-400 px-4 py-0.5 rounded-md "> Delete
+          </button>
+        </Tabledata>
       </Tablerow>
       <Tablerow>
-        <Tablehead class=" flex justify-center items-center"> <button @click="openform"
-            class="cursor-pointer bg-emerald-600 px-2 py-1 rounded-md"> create new </button></Tablehead>
+        <th colspan="6" class="p-2 border-2 border-sky-500"> <button @click="openform"
+            class="cursor-pointer bg-sky-500 px-2 py-1 rounded-md"> create new </button></th>
       </Tablerow>
     </table>
   </main>

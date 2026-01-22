@@ -5,7 +5,7 @@
 </script>
 
 <template>
-    <tr class="border px-2 " >
+    <tr class="px-2" >
         <slot />
     </tr>
 </template>
