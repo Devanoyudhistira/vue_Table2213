@@ -4,3 +4,16 @@
     --font-work : "Work Sans";
     --font-inter : "Inter";
 }
+
+
+.labelclass{
+    @apply flex flex-col gap-1 
+}
+
+.inputname{
+    @apply font-inter text-xl font-medium
+}
+
+.authinput{
+    @apply outline-none ring-0 border-blue-500 rounded-md w-160 focus:border-zinc-950 transition font-inter text-xl py-1 border-2
+}

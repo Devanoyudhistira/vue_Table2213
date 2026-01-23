@@ -4,12 +4,14 @@ import Tabledata from './components/Tabledata.vue';
 import Tablehead from './components/Tablehead.vue';
 import Tablerow from './components/Tablerow.vue';
 import Navbar from './components/navbar.vue';
+import Login from './components/login.vue'
 export default {
   components: {
     Tabledata,
     Tablehead,
     Tablerow,
     Navbar,
+    Login,
   },
   data() {
     return {
@@ -18,6 +20,7 @@ export default {
       userdata: null,
       userform: false,
       searchkey: "",
+      admin: true
     }
   },
   methods: {
@@ -60,30 +63,31 @@ export default {
         return;
       }
       this.userdata.push(userdata)
-      console.log(userdata)
     },
-    async deleteuser(target,uuid) {
-      console.log(uuid)
-      const { error:autherror } = await supabase.auth.admin.deleteUser(
+    async deleteuser(target, uuid) {
+      const { error: autherror } = await supabase.auth.admin.deleteUser(
         uuid
       )
-      if(autherror){
+      if (autherror) {
         console.log(autherror)
         return
       }
-      const { count, data, error:deleterror } = await supabase.from("Users").delete().eq('id', target).single().select();
+      const { count, data, error: deleterror } = await supabase.from("Users").delete().eq('id', target).single().select();
       if (deleterror) {
         console.log(deleteerror)
         return
       }
-      console.log(data)
-      // const deleteresult = this.userdata.filter(e => e.id !== target)
+      const deleteresult = this.userdata.filter(e => e.id !== target)
+      this.userdata = deleteresult
     },
 
   },
   watch: {
   },
   mounted() {
+    supabase.auth.onAuthStateChange((_event, session) => {
+      this.admin = !!session
+    })
     this.getdata()
     this.getuser()
   },
@@ -99,6 +103,9 @@ export default {
       }
       return this.userdata
     },
+    async logout() {
+      await supabase.auth.signOut()
+    },
     dataloaded() {
       if (this.userdata && this.data) {
         return true
@@ -110,9 +117,10 @@ export default {
 </script>
 
 <template>
-  <main v-if="dataloaded" class="w-screen h-screen flex flex-col px-1">
-    <Navbar />
-    <form class="flex mt-20 flex-col gap-3" @submit.prevent="newuser">
+  <main v-if="admin" class="">
+    <div v-if="dataloaded" class="w-screen h-screen flex flex-col px-1">
+      <Navbar :logout="() => logout" />
+      <!-- <form class="flex mt-20 flex-col gap-3" @submit.prevent="newuser">
         <label for="name">
           <h1>name:</h1>
           <input ref="name" type="text" name="name" id="name">
@@ -134,47 +142,51 @@ export default {
           <input ref="password" type="password" name="password" id="password">
         </label>
         <button type="submit"> Confirm </button>
-      </form>
+      </form> -->
 
 
-    <div class="mt-16 w-full h-max flex items-center justify-between">
-      <h1 class=" text-4xl font-work font-medium">Users Data</h1>
-      <label for="search" class="flex gap-2 mr-5">
-        <h1 class="font-inter font-medium text-2xl tracking-wider text-blue-400">search</h1>
-        <input type="text" v-model="searchkey" id="search" class="border-2 border-sky-500 font-work rounded-md" />
-      </label>
+      <div class="mt-16 w-full h-max flex items-center justify-between">
+        <h1 class=" text-4xl font-work font-semibold text-sky-600">Users Data</h1>
+        <div class="flex gap-1" >
+        <button class="border border-zinc-700 rounded-md w-7 h-7 flex items-center justify-center" > <i class="bi bi-plus text-2xl" >  </i> </button>
+        <button class="border border-zinc-700 rounded-md w-7 h-7 flex items-center justify-center" > <i class="bi bi-filter text-2xl" >  </i> </button>
+          <label for="search" class="flex mr-5 items-center justify-center">
+            <input type="text" v-model="searchkey" placeholder="search" id="search" class="border px-2 h-6 font-work rounded-md" />
+          </label>
+        </div>
+      </div>
+
+      <table class="font-work border-b-2">
+        <Tablerow>
+          <Tablehead>user id</Tablehead>
+          <Tablehead>name</Tablehead>
+          <Tablehead>status</Tablehead>
+          <Tablehead> role</Tablehead>
+          <Tablehead>edit</Tablehead>
+          <Tablehead>Delete</Tablehead>
+        </Tablerow>
+        <Tablerow v-for="user in datauser">
+          <Tabledata> {{ user.id }} </Tabledata>
+          <Tabledata>{{ user.name }}</Tabledata>
+          <Tabledata> {{ user.admin ? 'admin' : 'user' }} </Tabledata>
+          <Tabledata> {{ user.role }} </Tabledata>
+          <Tabledata> <button class="bg-sky-400 px-4 py-0.5 rounded-md "> Edit </button> </Tabledata>
+          <Tabledata> <button @click="() => deleteuser(user.id, user.uuid)"
+              class="bg-red-400 px-4 py-0.5 text-center rounded-md ">
+              <i class="bi bi-trash"> </i>
+              Delete
+            </button>
+          </Tabledata>
+        </Tablerow>
+      </table>
     </div>
-
-    <table class="font-work ">
-      <Tablerow>
-        <Tablehead>user id</Tablehead>
-        <Tablehead>name</Tablehead>
-        <Tablehead>status</Tablehead>
-        <Tablehead> role</Tablehead>
-        <Tablehead>edit</Tablehead>
-        <Tablehead>Delete</Tablehead>
-      </Tablerow>
-      <Tablerow v-for="user in datauser">
-        <Tabledata> {{ user.id }} </Tabledata>
-        <Tabledata>{{ user.name }}</Tabledata>
-        <Tabledata> {{ user.admin ? 'admin' : 'user' }} </Tabledata>
-        <Tabledata> {{ user.role }} </Tabledata>
-        <Tabledata> <button class="bg-sky-400 px-4 py-0.5 rounded-md "> Edit </button> </Tabledata>
-        <Tabledata> <button @click="() => deleteuser(user.id,user.uuid)" class="bg-red-400 px-4 py-0.5 rounded-md "> Delete
-          </button>
-        </Tabledata>
-      </Tablerow>
-      <Tablerow>
-        <th colspan="6" class="p-2 border-2 border-sky-500"> <button @click="openform"
-            class="cursor-pointer bg-sky-500 px-2 py-1 rounded-md"> create new </button></th>
-      </Tablerow>
-    </table>
+    <div v-else>
+      <div>
+        <h1 class="text-3xl text-green-600"> loading </h1>
+      </div>
+    </div>
   </main>
-  <div v-else>
-    <div>
-      <h1 class="text-3xl text-green-600"> loading </h1>
-    </div>
-  </div>
+  <Login v-else />
 
 
 </template>
