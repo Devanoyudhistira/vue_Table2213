@@ -15,5 +15,19 @@
 }
 
 .authinput{
-    @apply outline-none ring-0 border-blue-500 rounded-md w-160 focus:border-zinc-950 transition font-inter text-xl py-1 border-2
+    @apply outline-none ring-0 border-zinc-900 rounded-md w-160 focus:border-sky-500 transition font-inter text-xl py-1 border-2
+}
+
+.radioinput{
+    @apply flex gap-1 items-center  border w-full py-2 px-1 rounded-md transition
+}
+
+.formanimate-enter-active,
+.formanimate-leave-active {
+  @apply duration-100;
+}
+
+.formanimate-enter-from,
+.formanimate-leave-to {
+  @apply scale-0;
 }

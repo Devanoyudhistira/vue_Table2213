@@ -20,7 +20,8 @@ export default {
       userdata: null,
       userform: false,
       searchkey: "",
-      admin: true
+      admin: true,
+      newuserstatus: false
     }
   },
   methods: {
@@ -56,13 +57,14 @@ export default {
           role: "staff",
           image: `belum ada`,
           uuid: data.user.id,
-          admin: true
+          admin: this.newuserstatus
         }).single().select()
       if (insertError) {
         console.log(insertError)
         return;
       }
       this.userdata.push(userdata)
+      this.userform = false
     },
     async deleteuser(target, uuid) {
       const { error: autherror } = await supabase.auth.admin.deleteUser(
@@ -112,6 +114,12 @@ export default {
       }
       return false
     },
+    radiotrue() {
+      return this.newuserstatus ? "bg-sky-400/60 border-sky-700" : "bg-zinc-400/60 border-sky-900"
+    },
+    radiofalse() {
+      return !this.newuserstatus ? "bg-sky-400/60 border-sky-700" : "bg-zinc-400/60 border-sky-900"
+    },
   }
 }
 </script>
@@ -120,43 +128,64 @@ export default {
   <main v-if="admin" class="">
     <div v-if="dataloaded" class="w-screen h-screen flex flex-col px-1">
       <Navbar :logout="() => logout" />
-      <!-- <form class="flex mt-20 flex-col gap-3" @submit.prevent="newuser">
-        <label for="name">
-          <h1>name:</h1>
-          <input ref="name" type="text" name="name" id="name">
-        </label>
-        <label for="admin">
-          <h1>admin</h1>
-          <button :value="true"> admin </button>
-          <div class="flex flex-col gap-2  w-min h-min">
-            <input name="admin" type="radio" :value="true">true</input>
-            <input name="admin" type="radio" :value="false"> false </input>
+      <Transition name="formanimate">
+        <form v-if="userform"
+          class="flex items-center pb-3 w-180 h-max mt-20 flex-col gap-3 fixed top-10 left-88 border-2 border-sky-600 bg-zinc-100 rounded-md px-2 py-e"
+          @submit.prevent="newuser">
+          <div class="w-full flex justify-between px-2">
+            <h1 class="text-2xl font-work font-semibold tracking wider"> create new user </h1>
+            <i @click="closeform" class="bi bi-x text-3xl"></i>
           </div>
-        </label>
-        <label for="email">
-          email
-          <input ref="email" type="email" name="email" id="email">
-        </label>
-        <label for="password">
-          password
-          <input ref="password" type="password" name="password" id="password">
-        </label>
-        <button type="submit"> Confirm </button>
-      </form> -->
+          <label for="name" class="flex flex-col w-full ">
+            <h1 class="text-xl font-medium font-work">name </h1>
+            <input class="authinput h-8 " ref="name" type="text" name="name" id="name">
+          </label>
+          <label for="admin" class="w-full flex flex-col justify-between">
+            <h1 class="text-xl font-medium font-work">admin</h1>
+            <div class="flex justify-between gap-2 pr-10 w-full h-min">
+              <label for="trueadmin" class="radioinput" :class="radiotrue">
+                <h1 class="font-medium text-xl font-work">Yes</h1>
+                <input name="admin" class="hidden" id="trueadmin" type="radio" v-model="newuserstatus" :value="true" />
+              </label>
+              <label for="falseadmin" class="radioinput" :class="radiofalse">
+                <h1 class="font-medium text-xl font-work">No</h1>
+                <input name="admin" class="hidden" type="radio" id="falseadmin" v-model="newuserstatus"
+                  :value="false" />
+              </label>
+            </div>
+          </label>
+          <label class="flex flex-col w-full " for="email">
+            <h1 class="text-xl font-medium font-work">Email </h1>
+            <input class="authinput h-8" ref="email" type="email" name="email" id="email">
+          </label>
+          <label class="flex flex-col w-full " for="password">
+            <h1 class="text-xl font-medium font-work"> Password </h1>
+            <input class="authinput h-8" ref="password" type="password" name="password" id="password">
+          </label>
+          <button
+            class="font-work rounded-md w-max h-max px-2 py-1 text-2xl border text-white  bg-blue-600 border-sky-400 hover:scale-85 hover:text-blue-600 hover:bg-zinc-100 hover:border-2 hover:font-semibold transition"
+            type="submit"> Confirm </button>
+        </form>
+      </Transition>
 
 
       <div class="mt-16 w-full h-max flex items-center justify-between">
         <h1 class=" text-4xl font-work font-semibold text-sky-600">Users Data</h1>
-        <div class="flex gap-1" >
-        <button class="border border-zinc-700 rounded-md w-7 h-7 flex items-center justify-center" > <i class="bi bi-plus text-2xl" >  </i> </button>
-        <button class="border border-zinc-700 rounded-md w-7 h-7 flex items-center justify-center" > <i class="bi bi-filter text-2xl" >  </i> </button>
+        <div class="flex gap-1">
+          <button @click="openform" class="border border-zinc-700 rounded-md w-7 h-7 flex items-center justify-center">
+            <i class="bi bi-plus text-2xl"> </i> </button>
+          <button class="border border-zinc-700 rounded-md w-7 h-7 flex items-center justify-center"> <i
+              class="bi bi-funnel text-2xl"> </i> </button>
+          <button class="border border-zinc-700 rounded-md w-7 h-7 flex items-center justify-center"> <i
+              class="bi bi-filter text-2xl"> </i> </button>
           <label for="search" class="flex mr-5 items-center justify-center">
-            <input type="text" v-model="searchkey" placeholder="search" id="search" class="border px-2 h-6 font-work rounded-md" />
+            <input type="text" v-model="searchkey" placeholder="search" id="search"
+              class="border px-2 h-6 font-work rounded-md" />
           </label>
         </div>
       </div>
 
-      <table class="font-work border-b-2">
+      <table class="font-work border-b-2 border-blue-600">
         <Tablerow>
           <Tablehead>user id</Tablehead>
           <Tablehead>name</Tablehead>
@@ -170,7 +199,10 @@ export default {
           <Tabledata>{{ user.name }}</Tabledata>
           <Tabledata> {{ user.admin ? 'admin' : 'user' }} </Tabledata>
           <Tabledata> {{ user.role }} </Tabledata>
-          <Tabledata> <button class="bg-sky-400 px-4 py-0.5 rounded-md "> Edit </button> </Tabledata>
+          <Tabledata> <button class="bg-sky-400 px-4 py-0.5 rounded-md text-center ">
+              <i class="bi bi-pencil-square"> </i> 
+              Edit</button>
+          </Tabledata>
           <Tabledata> <button @click="() => deleteuser(user.id, user.uuid)"
               class="bg-red-400 px-4 py-0.5 text-center rounded-md ">
               <i class="bi bi-trash"> </i>

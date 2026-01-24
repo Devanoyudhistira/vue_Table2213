@@ -8,7 +8,7 @@ export default {
     },
     methods: {
         openmodal() {
-            this.modal = true
+            this.modal = !this.modal
         },
     },
 }
