@@ -23,10 +23,10 @@ export default {
             <div class="w-10 h-1 bg-zinc-100  "></div>
         </div>
         <Transition name="navmodal">
-            <div v-if="modal" class="fixed top-12 right-8 bg-zinc-200 w-45 h-max flex flex-col">
+            <div v-if="modal" class="fixed top-12 p-2 right-5 bg-zinc-200 w-45 h-max flex flex-col">
                 <h1 class="font-inter font-semibold text-md tracking-tight border-b border-b-white">
                     devanotira@gmail.com </h1>
-                <button @click="logout" class="text-md font-work font-bold bg-zinc-400/30 p-1 w-max"> Log Out </button>
+                <button @click="logout" class="text-md w-full font-work font-bold rounded-xl bg-red-700 "> Log Out </button>
             </div>
         </Transition>
     </nav>

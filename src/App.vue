@@ -21,10 +21,16 @@ export default {
       userform: false,
       searchkey: "",
       admin: true,
-      newuserstatus: false
+      newuserstatus: false,
+      thisUser: null,
+      filterform: false,
+      sortedname:false,
     }
   },
-  methods: {
+  methods: {   
+    openfilter() {
+      this.filterform = !this.filterform
+    },
     async getdata() {
       const { data, error } = await supabase.from("products").select()
       this.data = data
@@ -49,7 +55,7 @@ export default {
         console.log(error)
         return;
       }
-      console.log(data)
+
       const { data: userdata, error: insertError } = await supabase
         .from('Users')
         .insert({
@@ -98,12 +104,15 @@ export default {
       return this.data
     },
     datauser() {
-      if (this.searchkey.length > 4) {
+      if (this.searchkey.length > 2) {
         return this.userdata.filter(e => {
           return e.name.toLowerCase().includes(this.searchkey)
         })
       }
-      return this.userdata
+      if(this.sortedname){
+        return this.userdata.sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0))
+      }
+      return this.userdata.sort((a, b) => a.id - b.id);
     },
     async logout() {
       await supabase.auth.signOut()
@@ -119,7 +128,13 @@ export default {
     },
     radiofalse() {
       return !this.newuserstatus ? "bg-sky-400/60 border-sky-700" : "bg-zinc-400/60 border-sky-900"
+    },    
+    sorttrue() {
+      return this.sortedname ? "bg-sky-400/60 border-sky-700" : "bg-zinc-400/60 border-sky-900"
     },
+    sortfalse() {
+      return !this.sortedname ? "bg-sky-400/60 border-sky-700" : "bg-zinc-400/60 border-sky-900"
+    },    
   }
 }
 </script>
@@ -168,6 +183,21 @@ export default {
         </form>
       </Transition>
 
+      <form @submit.prevent v-if="filterform" class="fixed right-26 top-25 flex flex-col w-60 h-max py-1 px-2 bg-zinc-200">
+         <div class="w-full flex justify-between items-center px-2">
+            <h1 class="text-md font-work font-semibold tracking wider"> {{ sortedname ? "sort by name" : "sort by id" }} </h1>
+            <i @click="openfilter" class="bi bi-x text-xl"></i>
+          </div>
+        <label for="sortname" class="filterbutton" :class="sorttrue">
+          <h1 class="font-medium text-[10px] font-work">sort by name</h1>
+          <input name="sort" class="hidden" type="radio" id="sortname" :value="true" v-model="sortedname"/>         
+        </label>
+        <label for="sortid" class="filterbutton" :class="sortfalse">
+          <h1 class="font-medium text-[10px] font-work">Sort by id</h1>
+          <input name="sort" class="hidden" type="radio" id="sortid" :value="false" v-model="sortedname"/>         
+        </label>
+      </form>
+
 
       <div class="mt-16 w-full h-max flex items-center justify-between">
         <h1 class=" text-4xl font-work font-semibold text-sky-600">Users Data</h1>
@@ -176,7 +206,8 @@ export default {
             <i class="bi bi-plus text-2xl"> </i> </button>
           <button class="border border-zinc-700 rounded-md w-7 h-7 flex items-center justify-center"> <i
               class="bi bi-funnel text-2xl"> </i> </button>
-          <button class="border border-zinc-700 rounded-md w-7 h-7 flex items-center justify-center"> <i
+          <button @click="openfilter"
+            class="border border-zinc-700 rounded-md w-7 h-7 flex items-center justify-center"> <i
               class="bi bi-filter text-2xl"> </i> </button>
           <label for="search" class="flex mr-5 items-center justify-center">
             <input type="text" v-model="searchkey" placeholder="search" id="search"
@@ -200,7 +231,7 @@ export default {
           <Tabledata> {{ user.admin ? 'admin' : 'user' }} </Tabledata>
           <Tabledata> {{ user.role }} </Tabledata>
           <Tabledata> <button class="bg-sky-400 px-4 py-0.5 rounded-md text-center ">
-              <i class="bi bi-pencil-square"> </i> 
+              <i class="bi bi-pencil-square"> </i>
               Edit</button>
           </Tabledata>
           <Tabledata> <button @click="() => deleteuser(user.id, user.uuid)"

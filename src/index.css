@@ -21,6 +21,9 @@
 .radioinput{
     @apply flex gap-1 items-center  border w-full py-2 px-1 rounded-md transition
 }
+.filterbutton{
+    @apply flex gap-1 items-center border w-full  rounded-md transition
+}
 
 .formanimate-enter-active,
 .formanimate-leave-active {
