@@ -4,7 +4,8 @@ import Tabledata from './components/Tabledata.vue';
 import Tablehead from './components/Tablehead.vue';
 import Tablerow from './components/Tablerow.vue';
 import Navbar from './components/navbar.vue';
-import Login from './components/login.vue'
+import Login from './components/login.vue';
+import Flashmessage from './components/flashmessage.vue'
 export default {
   components: {
     Tabledata,
@@ -12,6 +13,7 @@ export default {
     Tablerow,
     Navbar,
     Login,
+    Flashmessage
   },
   data() {
     return {
@@ -24,12 +26,27 @@ export default {
       newuserstatus: false,
       thisUser: null,
       filterform: false,
-      sortedname:false,
+      sortedname: false,
+      flashStatus: false,
+      showflash: false,
+      editmode:false
     }
   },
-  methods: {   
+  methods: {
     openfilter() {
       this.filterform = !this.filterform
+    },
+    openFlash(statusmessage) {
+      this.showflash = true;
+      this.flashStatus = statusmessage
+      setTimeout(() => {
+        this.showflash = false
+        console.log(this.showflash)
+      }, 3000)
+    },
+    closeFlash() {
+      this.showflash = false;
+      console.log(this.showflash)
     },
     async getdata() {
       const { data, error } = await supabase.from("products").select()
@@ -52,7 +69,7 @@ export default {
         email_confirm: true,
       })
       if (error) {
-        console.log(error)
+        this.openFlash(false)
         return;
       }
 
@@ -66,27 +83,42 @@ export default {
           admin: this.newuserstatus
         }).single().select()
       if (insertError) {
-        console.log(insertError)
+        this.openFlash(false)
         return;
       }
+      this.openFlash(true)
       this.userdata.push(userdata)
       this.userform = false
+
     },
     async deleteuser(target, uuid) {
       const { error: autherror } = await supabase.auth.admin.deleteUser(
         uuid
       )
       if (autherror) {
-        console.log(autherror)
+        this.openFlash(false)
         return
       }
       const { count, data, error: deleterror } = await supabase.from("Users").delete().eq('id', target).single().select();
       if (deleterror) {
-        console.log(deleteerror)
+        this.openFlash(false)
         return
       }
+      this.openFlash(true)
       const deleteresult = this.userdata.filter(e => e.id !== target)
       this.userdata = deleteresult
+    },
+    async updateuser(adminstatus, newname, newrole, target) {
+      const { error, data } = await supabase.from('Users').update({ admin: adminstatus, name: newname, role: newrole }).eq('id', target)
+        .select().single()
+      if (data) {
+        this.userdata = this.userdata.map(e =>
+          e.id === target
+            ? { ...e, admin: adminstatus }
+            : e
+        )
+      }
+      return
     },
 
   },
@@ -109,7 +141,7 @@ export default {
           return e.name.toLowerCase().includes(this.searchkey)
         })
       }
-      if(this.sortedname){
+      if (this.sortedname) {
         return this.userdata.sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0))
       }
       return this.userdata.sort((a, b) => a.id - b.id);
@@ -128,13 +160,13 @@ export default {
     },
     radiofalse() {
       return !this.newuserstatus ? "bg-sky-400/60 border-sky-700" : "bg-zinc-400/60 border-sky-900"
-    },    
+    },
     sorttrue() {
       return this.sortedname ? "bg-sky-400/60 border-sky-700" : "bg-zinc-400/60 border-sky-900"
     },
     sortfalse() {
       return !this.sortedname ? "bg-sky-400/60 border-sky-700" : "bg-zinc-400/60 border-sky-900"
-    },    
+    },
   }
 }
 </script>
@@ -142,6 +174,9 @@ export default {
 <template>
   <main v-if="admin" class="">
     <div v-if="dataloaded" class="w-screen h-screen flex flex-col px-1">
+      <div v-if="showflash" class="absolute">
+        <Flashmessage :status="flashStatus" :showflash="showflash" :closeFlash="closeFlash" />
+      </div>
       <Navbar :logout="() => logout" />
       <Transition name="formanimate">
         <form v-if="userform"
@@ -183,24 +218,32 @@ export default {
         </form>
       </Transition>
 
-      <form @submit.prevent v-if="filterform" class="fixed right-26 top-25 flex flex-col w-60 h-max py-1 px-2 bg-zinc-200">
-         <div class="w-full flex justify-between items-center px-2">
-            <h1 class="text-md font-work font-semibold tracking wider"> {{ sortedname ? "sort by name" : "sort by id" }} </h1>
-            <i @click="openfilter" class="bi bi-x text-xl"></i>
-          </div>
+      <form @submit.prevent v-if="filterform"
+        class="fixed right-26 top-25 flex flex-col w-60 h-max py-1 px-2 bg-zinc-200">
+        <div class="w-full flex justify-between items-center px-2">
+          <h1 class="text-md font-work font-semibold tracking wider"> Sort the Data </h1>
+          <i @click="openfilter" class="bi bi-x text-xl"></i>
+        </div>
         <label for="sortname" class="filterbutton" :class="sorttrue">
           <h1 class="font-medium text-[10px] font-work">sort by name</h1>
-          <input name="sort" class="hidden" type="radio" id="sortname" :value="true" v-model="sortedname"/>         
+          <input name="sort" class="hidden" type="radio" id="sortname" :value="true" v-model="sortedname" />
         </label>
         <label for="sortid" class="filterbutton" :class="sortfalse">
           <h1 class="font-medium text-[10px] font-work">Sort by id</h1>
-          <input name="sort" class="hidden" type="radio" id="sortid" :value="false" v-model="sortedname"/>         
+          <input name="sort" class="hidden" type="radio" id="sortid" :value="false" v-model="sortedname" />
         </label>
       </form>
 
 
-      <div class="mt-16 w-full h-max flex items-center justify-between">
-        <h1 class=" text-4xl font-work font-semibold text-sky-600">Users Data</h1>
+      <div class="mt-16 mb-1.5 w-full h-max flex items-center justify-between">
+        <div class="flex gap-2 items-center justify-center">
+          <h1 class="text-3xl font-work font-semibold text-sky-600">Users Data</h1>
+          <div
+            class="w-min h-min p-1 border-t-2 border-blue-700 bg-sky-600/20 flex flex-col items-center justify-center">
+            <h1 class="font-work text-md font-bold text-blue-700">Users</h1>
+            <h4 class="font-inter text-[18px] -mt-1.5 text-blue-800 font-bold "> {{ datauser.length }} </h4>
+          </div>
+        </div>
         <div class="flex gap-1">
           <button @click="openform" class="border border-zinc-700 rounded-md w-7 h-7 flex items-center justify-center">
             <i class="bi bi-plus text-2xl"> </i> </button>
@@ -227,15 +270,16 @@ export default {
         </Tablerow>
         <Tablerow v-for="user in datauser">
           <Tabledata> {{ user.id }} </Tabledata>
-          <Tabledata>{{ user.name }}</Tabledata>
+          <Tabledata v-if="!editmode" >{{ user.name }}</Tabledata>
+          <Tabledata v-if="editmode" > <input type="text"> </Tabledata>
           <Tabledata> {{ user.admin ? 'admin' : 'user' }} </Tabledata>
-          <Tabledata> {{ user.role }} </Tabledata>
-          <Tabledata> <button class="bg-sky-400 px-4 py-0.5 rounded-md text-center ">
+          <Tabledata> {{ user.role }} </Tabledata>          
+          <Tabledata> <button class="bg-sky-600/60 border-blue-800 border-2 px-4 py-0.5 rounded-md text-center font-inter text-[14px] font-medium">
               <i class="bi bi-pencil-square"> </i>
               Edit</button>
           </Tabledata>
           <Tabledata> <button @click="() => deleteuser(user.id, user.uuid)"
-              class="bg-red-400 px-4 py-0.5 text-center rounded-md ">
+              class="bg-red-600/60 border-red-700 border-2 text-[14px] font-medium font-inter px-4 py-0.5 text-center rounded-md ">
               <i class="bi bi-trash"> </i>
               Delete
             </button>
