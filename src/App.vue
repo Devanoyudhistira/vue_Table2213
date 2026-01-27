@@ -29,12 +29,18 @@ export default {
       sortedname: false,
       flashStatus: false,
       showflash: false,
-      editmode:false
+      editmode: null,
+      newname: null,
+      adminstatus: false,
+      updateRoleModal: false
     }
   },
   methods: {
     openfilter() {
       this.filterform = !this.filterform
+    },
+    iseditmode(target) {
+      return this.editmode !== target
     },
     openFlash(statusmessage) {
       this.showflash = true;
@@ -108,16 +114,23 @@ export default {
       const deleteresult = this.userdata.filter(e => e.id !== target)
       this.userdata = deleteresult
     },
-    async updateuser(adminstatus, newname, newrole, target) {
-      const { error, data } = await supabase.from('Users').update({ admin: adminstatus, name: newname, role: newrole }).eq('id', target)
+    editToggle(id) {
+      this.editmode = this.editmode === id ? null : id
+    },
+    async updateuser(target) {
+      const { error, data } = await supabase.from('Users').update({ admin: this.adminstatus, name: this.newname }).eq('id', target)
         .select().single()
       if (data) {
         this.userdata = this.userdata.map(e =>
           e.id === target
-            ? { ...e, admin: adminstatus }
+            ? { ...e, admin: this.adminstatus, name: this.newname }
             : e
         )
+        this.openFlash(true)
+        this.editmode = null
       }
+      this.editmode = null
+      console.log(error)
       return
     },
 
@@ -167,6 +180,13 @@ export default {
     sortfalse() {
       return !this.sortedname ? "bg-sky-400/60 border-sky-700" : "bg-zinc-400/60 border-sky-900"
     },
+    adminUpdate() {
+      return this.adminstatus ? "bg-sky-400 border-sky-700" : "bg-zinc-400 border-sky-900"
+    },
+    userUpdate() {
+      return !this.adminstatus ? "bg-sky-400 border-sky-700" : "bg-zinc-400 border-sky-900"
+    },
+
   }
 }
 </script>
@@ -270,18 +290,46 @@ export default {
         </Tablerow>
         <Tablerow v-for="user in datauser">
           <Tabledata> {{ user.id }} </Tabledata>
-          <Tabledata v-if="!editmode" >{{ user.name }}</Tabledata>
-          <Tabledata v-if="editmode" > <input type="text"> </Tabledata>
+          <Tabledata v-if="iseditmode(user.id)">{{ user.name }}</Tabledata>
+          <Tabledata v-else> <input v-model="newname" class="border-2 border-black w-38" type="text"> </Tabledata>
           <Tabledata> {{ user.admin ? 'admin' : 'user' }} </Tabledata>
-          <Tabledata> {{ user.role }} </Tabledata>          
-          <Tabledata> <button class="bg-sky-600/60 border-blue-800 border-2 px-4 py-0.5 rounded-md text-center font-inter text-[14px] font-medium">
-              <i class="bi bi-pencil-square"> </i>
-              Edit</button>
+          <Tabledata v-if="iseditmode(user.id)"> {{ user.role }} </Tabledata>
+          <Tabledata v-else>
+            <div class="relative">
+              <button @click="() => updateRoleModal = true"  > {{ user.admin ? 'admin' : 'user' }} </button>
+              <div v-show="updateRoleModal" class="w-max h-max p-2 border border-blue-800 bg-sky-400/40 absolute z-1000 right-13 top-5">
+                <label for="newadmin" class="radioadmin" :class="adminUpdate">
+                  <h1 class="text-md font-work font-semibold" > admin </h1>
+                  <input name="admin" class="hidden" id="newadmin" type="radio" v-model="adminstatus" :value="true" />
+                </label>
+                <label for="newfalseadmin" class="radioadmin" :class="userUpdate">
+                  <h1> user </h1>
+                  <input name="admin" class="hidden" id="newfalseadmin" type="radio" v-model="adminstatus"
+                    :value="false" />
+                </label>
+              </div>
+            </div>
           </Tabledata>
-          <Tabledata> <button @click="() => deleteuser(user.id, user.uuid)"
+          <Tabledata>
+            <button v-if="iseditmode(user.id)" @click="() => editToggle(user.id)"
+              class="bg-sky-600/60 border-blue-800 border-2 px-4 py-0.5 rounded-md text-center font-inter text-[14px] font-medium">
+              <i class="bi bi-pencil-square"> </i>
+              Edit </button>
+            <button v-else @click="() => updateuser(user.id)"
+              class="bg-sky-600/60 border-blue-800 border-2 px-4 py-0.5 rounded-md text-center font-inter text-[14px] font-medium">
+              <i class="bi bi-check-circle"> </i>
+              confirm </button>
+          </Tabledata>
+          <Tabledata>
+            <button v-if="iseditmode(user.id)" @click="() => deleteuser(user.id, user.uuid)"
               class="bg-red-600/60 border-red-700 border-2 text-[14px] font-medium font-inter px-4 py-0.5 text-center rounded-md ">
               <i class="bi bi-trash"> </i>
               Delete
+            </button>
+            <button v-else @click="() => editToggle(user.id)"
+              class="bg-red-600/60 border-red-700 border-2 text-[14px] font-medium font-inter px-4 py-0.5 text-center rounded-md ">
+              <i class="bi bi-exclamation-diamond"> </i>
+              cancel
             </button>
           </Tabledata>
         </Tablerow>

@@ -29,7 +29,7 @@ export default {
         <button @click="() => closeFlash()" class="cursor-pointer self-end -mt-4"> <i class="bi bi-x text-3xl "></i>
         </button>
         <div class="flex w-full justify-between items-center  px-1.5 -mt-2">
-            <h1 class="font-work text-[15px] font-semibold"> {{ showflash }} {{ statusMessage }} </h1>
+            <h1 class="font-work text-[15px] font-semibold"> {{ statusMessage }} </h1>
             <i class="bi text-3xl" :class="statusIcon"></i>
         </div>
     </div>
