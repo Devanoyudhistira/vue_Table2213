@@ -1,6 +1,6 @@
 <script>
 export default {
-    props: ["logout","loginnow"],
+    props: ["logout","loginnow","currentUser"],
     data() {
         return {
             modal: false
@@ -24,8 +24,7 @@ export default {
         </div>
         <Transition name="navmodal">
             <div v-if="modal" class="fixed top-12 p-2 right-5 bg-zinc-200 w-45 h-max flex flex-col">
-                <h1 class="font-inter font-semibold text-md tracking-tight border-b border-b-white">
-                    devanotira@gmail.com </h1>
+                <h1 v-text="currentUser" class="font-inter font-semibold text-md tracking-tight border-b border-b-white"></h1>
                 <button @click="logout" class="text-md w-full font-work font-bold rounded-xl bg-red-700 "> Log Out </button>
             </div>
         </Transition>

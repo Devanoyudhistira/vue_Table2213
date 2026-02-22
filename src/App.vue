@@ -6,6 +6,7 @@ import Tablerow from './components/Tablerow.vue';
 import Navbar from './components/navbar.vue';
 import Login from './components/login.vue';
 import Flashmessage from './components/flashmessage.vue'
+import Loading from './components/loading.vue';
 export default {
   components: {
     Tabledata,
@@ -13,7 +14,8 @@ export default {
     Tablerow,
     Navbar,
     Login,
-    Flashmessage
+    Flashmessage,
+    Loading
   },
   data() {
     return {
@@ -33,7 +35,8 @@ export default {
       newname: null,
       adminstatus: false,
       updateRoleModal: true,
-      addedname:""
+      addedname:"",
+      currentaccount:""
     }
   },
   methods: {
@@ -159,7 +162,8 @@ export default {
   },
   mounted() {
     supabase.auth.onAuthStateChange((_event, session) => {      
-      this.admin = !!session      
+      this.admin = !!session  
+      this.currentaccount = session.user.email    
     })
     this.getdata()
     this.getuser()
@@ -223,7 +227,7 @@ export default {
       <div v-if="showflash" class="absolute">
         <Flashmessage :status="flashStatus" :showflash="showflash" :closeFlash="closeFlash" />
       </div>
-      <Navbar :logout="() => logout" />
+      <Navbar :currentUser="currentaccount" :logout="() => logout" />
       <Transition name="formanimate">
         <form v-if="userform"
           class="flex items-center pb-3 w-180 h-max mt-20 flex-col gap-3 fixed top-10 left-88 border-2 border-sky-600 bg-zinc-100 rounded-md px-2 py-e"
@@ -365,10 +369,8 @@ export default {
         </Tablerow>
       </table>
     </div>
-    <div v-else>
-      <div>
-        <h1 class="text-3xl text-green-600"> loading </h1>
-      </div>
+    <div class="w-full h-screen flex justify-center items-center " v-else>
+      <Loading/>
     </div>
   </main>
   <Login v-else />
