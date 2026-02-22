@@ -1,6 +1,6 @@
 <script>
 export default {
-    props: ["logout"],
+    props: ["logout","loginnow"],
     data() {
         return {
             modal: false
