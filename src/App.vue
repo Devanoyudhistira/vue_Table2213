@@ -30,7 +30,7 @@ export default {
       filterform: false,
       sortedname: false,
       flashStatus: false,
-      showflash: false,
+      showflash: true,
       editmode: null,
       newname: null,
       adminstatus: false,
@@ -230,16 +230,16 @@ export default {
       <Navbar :currentUser="currentaccount" :logout="() => logout" />
       <Transition name="formanimate">
         <form v-if="userform"
-          class="flex items-center pb-3 w-180 h-max mt-20 flex-col gap-3 fixed top-10 left-88 border-2 border-sky-600 bg-zinc-100 rounded-md px-2 py-e"
+          class="flex items-center pb-3 md:w-180 left-13 lg:left-88 w-70 h-max mt-20 flex-col gap-3 fixed top-10 border-2 border-sky-600 bg-zinc-100 rounded-md px-2 py-e"
           @submit.prevent="newuser">
-          <div class="w-full flex justify-between px-2">
+          <div class="w-full flex justify-between lg:px-2">
             <h1 class="text-2xl font-work font-semibold tracking wider"> create new user </h1>
             <i @click="closeform" class="bi bi-x text-3xl"></i>
           </div>
           <label for="name" class="flex flex-col w-full ">
             <h1 class="text-xl font-medium font-work">name </h1>
             <input class="authinput h-8" v-model="addedname" ref="name" type="text" name="name" id="name">
-            <h3 v-show="newnamecomputed" class="text-red-800 font-inter text-2xl font-medium" >name character must be more than 8</h3>
+            <h3 v-show="newnamecomputed" class="text-red-800 font-inter text-[14px] lg:text-2xl font-bold" >name character must be more than 8</h3>
           </label>
           <label for="admin" class="w-full flex flex-col justify-between">
             <h1 class="text-xl font-medium font-work">admin</h1>
@@ -288,14 +288,14 @@ export default {
 
       <div class="mt-16 mb-1.5 w-full h-max flex items-center justify-between">
         <div class="flex gap-2 items-center justify-center">
-          <h1 class="text-3xl font-work font-semibold text-sky-600">Users Data</h1>
+          <h1 class="md:text-3xl text-[17px] w-max font-work font-semibold text-sky-600">Users Data</h1>
           <div
-            class="w-min h-min p-1 border-t-2 border-blue-700 bg-sky-600/20 flex flex-col items-center justify-center">
-            <h1 class="font-work text-md font-bold text-blue-700">Users</h1>
-            <h4 class="font-inter text-[18px] -mt-1.5 text-blue-800 font-bold "> {{ datauser.length }} </h4>
+            class="w-min h-min p-1 -mb-1 border-t-2 border-blue-700 bg-sky-600/20 flex flex-col items-center justify-center">
+            <h1 class="font-work text-[15px] md:text-xl  font-bold text-blue-700">Users</h1>
+            <h4 class="font-inter text-[16px] md:text-[18px] -mt-1.5 text-blue-800 font-bold "> {{ datauser.length }} </h4>
           </div>
         </div>
-        <div class="flex gap-1">
+        <div class="flex gap-1 md:ml-10 -mb-6 md:-mb-8 ml-2">
           <button @click="openform" class="border border-zinc-700 rounded-md w-7 h-7 flex items-center justify-center">
             <i class="bi bi-plus text-2xl"> </i> </button>
           <button class="border border-zinc-700 rounded-md w-7 h-7 flex items-center justify-center"> <i
@@ -305,12 +305,12 @@ export default {
               class="bi bi-filter text-2xl"> </i> </button>
           <label for="search" class="flex mr-5 items-center justify-center">
             <input type="text" v-model="searchkey" placeholder="search" id="search"
-              class="border px-2 h-6 font-work rounded-md" />
+              class="border px-2 h-6 md:w-auto w-32 font-work rounded-md" />
           </label>
         </div>
       </div>
 
-      <table class="font-work border-b-2 border-blue-600">
+      <table class="font-work border-b-2 border-x-2 border-blue-600 w-max md:w-auto">
         <Tablerow>
           <Tablehead>user id</Tablehead>
           <Tablehead>name</Tablehead>
@@ -320,7 +320,9 @@ export default {
           <Tablehead>Delete</Tablehead>
         </Tablerow>
         <Tablerow v-for="user in datauser">
-          <Tabledata> {{ user.id }} </Tabledata>
+           <td class=" w-max h-max px-3 py-1 text-center border-r-2 border-b-2 border-blue-700" >
+            {{ user.id }} 
+          </td>
           <Tabledata v-if="iseditmode(user.id)">{{ user.name }}</Tabledata>
           <Tabledata v-else> <input v-model="newname" class="border-2 border-black w-38" type="text"> </Tabledata>
           <Tabledata> {{ user.role }} </Tabledata>
@@ -346,7 +348,7 @@ export default {
           </Tabledata>
           <Tabledata>
             <button v-if="iseditmode(user.id)" @click="() => editToggle(user.id, user.name, user.admin)"
-              class="bg-sky-600/60 border-blue-800 border-2 px-4 py-0.5 rounded-md text-center font-inter text-[14px] font-medium">
+              class="bg-sky-600/60 border-blue-800 border-2 w-max mr-4 px-4 py-0.5 rounded-md text-center font-inter text-[14px] font-medium">
               <i class="bi bi-pencil-square"> </i>
               Edit </button>
             <button v-else @click="() => updateuser(user.id)"
@@ -356,7 +358,7 @@ export default {
           </Tabledata>
           <Tabledata>
             <button v-if="iseditmode(user.id)" @click="() => deleteuser(user.id, user.uuid)"
-              class="bg-red-600/60 border-red-700 border-2 text-[14px] font-medium font-inter px-4 py-0.5 text-center rounded-md ">
+              class="bg-red-600/60 border-red-700 border-2 w-max text-[14px] font-medium font-inter px-4 py-0.5 text-center rounded-md ">
               <i class="bi bi-trash"> </i>
               Delete
             </button>

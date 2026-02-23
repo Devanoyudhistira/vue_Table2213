@@ -13,7 +13,7 @@ export default {
 
 <template>
     <div class="flex flex-col gap-1" >
-        <VueSpinnerFacebook size="130" color="emerald" />
+        <VueSpinnerFacebook size="130" color="lightgreen" />
         <h1 class="font-work -mt-1 text-4xl text-emerald-200 font-bold">Loading</h1>
     </div>
 </template>

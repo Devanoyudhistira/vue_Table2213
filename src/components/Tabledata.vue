@@ -5,7 +5,7 @@
 </script>
 
 <template>
-    <td class=" w-20  py-1 text-center" >
+    <td class=" w-max px-3 py-1 text-center" >
         <slot />
     </td>
 </template>
