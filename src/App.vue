@@ -35,17 +35,17 @@ export default {
       newname: null,
       adminstatus: false,
       updateRoleModal: true,
-      addedname:"",
-      currentaccount:""
+      addedname: "",
+      currentaccount: ""
     }
   },
   methods: {
-     newnamecompare(){
+    newnamecompare() {
       return this.addedname.length < 8
-    },  
+    },
     handleInput() {
-      const resultcompare = this.userdata.filter(e => e.name == this.$refs.name.value )      
-      return resultcompare.length > 0 
+      const resultcompare = this.userdata.filter(e => e.name == this.$refs.name.value)
+      return resultcompare.length > 0
     },
     openfilter() {
       this.filterform = !this.filterform
@@ -57,11 +57,11 @@ export default {
       this.showflash = true;
       this.flashStatus = statusmessage
       setTimeout(() => {
-        this.closeFlash        
+        this.closeFlash
       }, 3000)
     },
     closeFlash() {
-      this.showflash = false;      
+      this.showflash = false;
     },
     async getdata() {
       const { data, error } = await supabase.from("products").select()
@@ -88,11 +88,11 @@ export default {
         console.log(error)
         return;
       }
-      if(this.handleInput()){
+      if (this.handleInput()) {
         this.openFlash(false)
         return;
       }
-      if(this.newnamecompare()){
+      if (this.newnamecompare()) {
         this.openFlash(false)
         return;
       }
@@ -161,9 +161,9 @@ export default {
 
   },
   mounted() {
-    supabase.auth.onAuthStateChange((_event, session) => {      
-      this.admin = !!session  
-      this.currentaccount = session.user.email    
+    supabase.auth.onAuthStateChange((_event, session) => {
+      this.admin = !!session
+      this.currentaccount = session.user.email
     })
     this.getdata()
     this.getuser()
@@ -211,10 +211,10 @@ export default {
     },
     userUpdate() {
       return !this.adminstatus ? "bg-sky-400 border-sky-700" : "bg-zinc-400 border-sky-900"
-    },      
-     newnamecomputed(){
+    },
+    newnamecomputed() {
       return this.addedname.length < 8
-    },  
+    },
 
   }
 
@@ -222,7 +222,7 @@ export default {
 </script>
 
 <template>
-  <main v-if="admin" class="">
+  <main v-if="admin" class="overflow-hidden">
     <div v-if="dataloaded" class="w-screen h-screen flex flex-col px-1">
       <div v-if="showflash" class="absolute">
         <Flashmessage :status="flashStatus" :showflash="showflash" :closeFlash="closeFlash" />
@@ -239,7 +239,8 @@ export default {
           <label for="name" class="flex flex-col w-full ">
             <h1 class="text-xl font-medium font-work">name </h1>
             <input class="authinput h-8" v-model="addedname" ref="name" type="text" name="name" id="name">
-            <h3 v-show="newnamecomputed" class="text-red-800 font-inter text-[14px] lg:text-2xl font-bold" >name character must be more than 8</h3>
+            <h3 v-show="newnamecomputed" class="text-red-800 font-inter text-[14px] lg:text-2xl font-bold">name
+              character must be more than 8</h3>
           </label>
           <label for="admin" class="w-full flex flex-col justify-between">
             <h1 class="text-xl font-medium font-work">admin</h1>
@@ -292,9 +293,11 @@ export default {
           <div
             class="w-min h-min p-1 -mb-1 border-t-2 border-blue-700 bg-sky-600/20 flex flex-col items-center justify-center">
             <h1 class="font-work text-[15px] md:text-xl  font-bold text-blue-700">Users</h1>
-            <h4 class="font-inter text-[16px] md:text-[18px] -mt-1.5 text-blue-800 font-bold "> {{ datauser.length }} </h4>
+            <h4 class="font-inter text-[16px] md:text-[18px] -mt-1.5 text-blue-800 font-bold "> {{ datauser.length }}
+            </h4>
           </div>
         </div>
+        
         <div class="flex gap-1 md:ml-10 -mb-6 md:-mb-8 ml-2">
           <button @click="openform" class="border border-zinc-700 rounded-md w-7 h-7 flex items-center justify-center">
             <i class="bi bi-plus text-2xl"> </i> </button>
@@ -310,69 +313,72 @@ export default {
         </div>
       </div>
 
-      <table class="font-work border-b-2 border-x-2 overflow-scroll border-blue-600 w-max md:w-auto">
-        <Tablerow>
-          <Tablehead>user id</Tablehead>
-          <Tablehead>name</Tablehead>
-          <Tablehead>status</Tablehead>
-          <Tablehead> role</Tablehead>
-          <Tablehead>edit</Tablehead>
-          <Tablehead>Delete</Tablehead>
-        </Tablerow>
-        <Tablerow v-for="user in datauser">
-           <td class=" w-max h-max px-3 py-1 text-center border-r-2 border-b-2 border-blue-700" >
-            {{ user.id }} 
-          </td>
-          <Tabledata v-if="iseditmode(user.id)">{{ user.name }}</Tabledata>
-          <Tabledata v-else> <input v-model="newname" class="border-2 border-black w-38" type="text"> </Tabledata>
-          <Tabledata> {{ user.role }} </Tabledata>
-          <Tabledata v-if="iseditmode(user.id)"> {{ user.admin ? 'admin' : 'user' }} </Tabledata>
-          <Tabledata v-else>
-            <div class="relative">
-              <button @click="() => updateRoleModal = !updateRoleModal"
-                class="bg-blue-900/50 border-sky-300 border px-2 py-1"> {{ adminstatus ? 'admin' : 'user' }} <i
-                  class="bi bi-chevron-expand"></i> </button>
-              <div v-show="!updateRoleModal"
-                class="w-max h-max p-2 border border-blue-800 bg-sky-400/40 absolute z-1000 right-14.5 top-9">
-                <label for="newadmin" class="radioadmin" :class="adminUpdate">
-                  <h1 class="text-md font-work font-semibold"> admin </h1>
-                  <input name="admin" class="hidden" id="newadmin" type="radio" v-model="adminstatus" :value="true" />
-                </label>
-                <label for="newfalseadmin" class="radioadmin" :class="userUpdate">
-                  <h1 class="text-md font-work font-semibold"> user </h1>
-                  <input name="admin" class="hidden" id="newfalseadmin" type="radio" v-model="adminstatus"
-                    :value="false" />
-                </label>
+      <!-- this is table --> 
+       <div class=" overflow-x-auto w-screen " >
+        <table class="font-work inline-block md:table border-b-2 border-x-2  border-blue-600 w-max md:w-screen">
+          <Tablerow>
+            <Tablehead>user id</Tablehead>
+            <Tablehead>name</Tablehead>
+            <Tablehead>status</Tablehead>
+            <Tablehead> role</Tablehead>
+            <Tablehead>edit</Tablehead>
+            <Tablehead>Delete</Tablehead>
+          </Tablerow>
+          <Tablerow v-for="user in datauser">
+            <td class=" w-max h-max px-3 py-1 text-center border-r-2 border-b-2 border-blue-700">
+              {{ user.id }}
+            </td>
+            <Tabledata v-if="iseditmode(user.id)">{{ user.name }}</Tabledata>
+            <Tabledata v-else> <input v-model="newname" class="border-2 border-black w-38" type="text"> </Tabledata>
+            <Tabledata> {{ user.role }} </Tabledata>
+            <Tabledata v-if="iseditmode(user.id)"> {{ user.admin ? 'admin' : 'user' }} </Tabledata>
+            <Tabledata v-else>
+              <div class="relative">
+                <button @click="() => updateRoleModal = !updateRoleModal"
+                  class="bg-blue-900/50 border-sky-300 border px-2 py-1"> {{ adminstatus ? 'admin' : 'user' }} <i
+                    class="bi bi-chevron-expand"></i> </button>
+                <div v-show="!updateRoleModal"
+                  class="w-max h-max p-2 border border-blue-800 bg-sky-400/40 absolute z-1000 right-14.5 top-9">
+                  <label for="newadmin" class="radioadmin" :class="adminUpdate">
+                    <h1 class="text-md font-work font-semibold"> admin </h1>
+                    <input name="admin" class="hidden" id="newadmin" type="radio" v-model="adminstatus" :value="true" />
+                  </label>
+                  <label for="newfalseadmin" class="radioadmin" :class="userUpdate">
+                    <h1 class="text-md font-work font-semibold"> user </h1>
+                    <input name="admin" class="hidden" id="newfalseadmin" type="radio" v-model="adminstatus"
+                      :value="false" />
+                  </label>
+                </div>
               </div>
-            </div>
-          </Tabledata>
-          <Tabledata>
-            <button v-if="iseditmode(user.id)" @click="() => editToggle(user.id, user.name, user.admin)"
-              class="bg-sky-600/60 border-blue-800 border-2 w-max mr-4 px-4 py-0.5 rounded-md text-center font-inter text-[14px] font-medium">
-              <i class="bi bi-pencil-square"> </i>
-              Edit </button>
-            <button v-else @click="() => updateuser(user.id)"
-              class="bg-sky-600/60 border-blue-800 border-2 px-4 py-0.5 rounded-md text-center font-inter text-[14px] font-medium">
-              <i class="bi bi-check-circle"> </i>
-              confirm </button>
-          </Tabledata>
-          <Tabledata>
-            <button v-if="iseditmode(user.id)" @click="() => deleteuser(user.id, user.uuid)"
-              class="bg-red-600/60 border-red-700 border-2 w-max text-[14px] font-medium font-inter px-4 py-0.5 text-center rounded-md ">
-              <i class="bi bi-trash"> </i>
-              Delete
-            </button>
-            <button v-else @click="() => editToggle(user.id, '', false)"
-              class="bg-red-600/60 border-red-700 border-2 text-[14px] font-medium font-inter px-4 py-0.5 text-center rounded-md ">
-              <i class="bi bi-exclamation-diamond"> </i>
-              cancel
-            </button>
-          </Tabledata>
-        </Tablerow>
-      </table>
-    </div>
+            </Tabledata>
+            <Tabledata>
+              <button v-if="iseditmode(user.id)" @click="() => editToggle(user.id, user.name, user.admin)"
+                class="bg-sky-600/60 border-blue-800 border-2 w-max mr-4 px-4 py-0.5 rounded-md text-center font-inter text-[14px] font-medium">
+                <i class="bi bi-pencil-square"> </i>
+                Edit </button>
+              <button v-else @click="() => updateuser(user.id)"
+                class="bg-sky-600/60 border-blue-800 border-2 px-4 py-0.5 rounded-md text-center font-inter text-[14px] font-medium">
+                <i class="bi bi-check-circle"> </i>
+                confirm </button>
+            </Tabledata>
+            <Tabledata>
+              <button v-if="iseditmode(user.id)" @click="() => deleteuser(user.id, user.uuid)"
+                class="bg-red-600/60 border-red-700 border-2 w-max text-[14px] font-medium font-inter px-4 py-0.5 text-center rounded-md ">
+                <i class="bi bi-trash"> </i>
+                Delete
+              </button>
+              <button v-else @click="() => editToggle(user.id, '', false)"
+                class="bg-red-600/60 border-red-700 border-2 text-[14px] font-medium font-inter px-4 py-0.5 text-center rounded-md ">
+                <i class="bi bi-exclamation-diamond"> </i>
+                cancel
+              </button>
+            </Tabledata>
+          </Tablerow>
+        </table>
+      </div>    
+      </div>     
     <div class="w-full h-screen flex justify-center items-center " v-else>
-      <Loading/>
+      <Loading />
     </div>
   </main>
   <Login v-else />
