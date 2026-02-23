@@ -310,7 +310,7 @@ export default {
         </div>
       </div>
 
-      <table class="font-work border-b-2 border-x-2 border-blue-600 w-max md:w-auto">
+      <table class="font-work border-b-2 border-x-2 overflow-scroll border-blue-600 w-max md:w-auto">
         <Tablerow>
           <Tablehead>user id</Tablehead>
           <Tablehead>name</Tablehead>
