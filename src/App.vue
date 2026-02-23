@@ -30,7 +30,7 @@ export default {
       filterform: false,
       sortedname: false,
       flashStatus: false,
-      showflash: true,
+      showflash: false,
       editmode: null,
       newname: null,
       adminstatus: false,
