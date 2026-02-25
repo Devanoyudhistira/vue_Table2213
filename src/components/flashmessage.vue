@@ -24,7 +24,7 @@ export default {
 </script>
 
 <template>
-    <div class="fixed top-14 md:left-135 left-13 w-70 h-20 md:w-90 md:h-30 justify-center items-start border-3 rounded-2xl border-blue-800 flex flex-col"
+    <div class="fixed top-14 md:left-135 left-13 w-70 h-20 z-999 md:w-90 md:h-30 justify-center items-start border-3 rounded-2xl border-blue-800 flex flex-col"
         :class="statusStyle">
         <button @click="() => closeFlash()" :class="this.status ? '-mt-4 md:-mt-9' : '-mt-2'" class="cursor-pointer self-end "> <i class="bi bi-x text-3xl "></i>
         </button>

@@ -78,6 +78,14 @@ export default {
       this.userform = false
     },
     async newuser() {
+      if (this.handleInput()) {
+        this.openFlash(false)
+        return;
+      }
+      if (this.newnamecompare()) {
+        this.openFlash(false)
+        return;
+      }
       const { data, error } = await supabase.auth.admin.createUser({
         email: this.$refs.email.value,
         password: this.$refs.password.value,
@@ -88,14 +96,7 @@ export default {
         console.log(error)
         return;
       }
-      if (this.handleInput()) {
-        this.openFlash(false)
-        return;
-      }
-      if (this.newnamecompare()) {
-        this.openFlash(false)
-        return;
-      }
+
       const { data: userdata, error: insertError } = await supabase
         .from('Users')
         .insert({
@@ -297,7 +298,7 @@ export default {
             </h4>
           </div>
         </div>
-        
+
         <div class="flex gap-1 md:ml-10 -mb-6 md:-mb-8 ml-2">
           <button @click="openform" class="border border-zinc-700 rounded-md w-7 h-7 flex items-center justify-center">
             <i class="bi bi-plus text-2xl"> </i> </button>
@@ -313,8 +314,8 @@ export default {
         </div>
       </div>
 
-      <!-- this is table --> 
-       <div class=" overflow-x-auto w-screen " >
+      <!-- this is table -->
+      <div class=" overflow-x-auto w-screen ">
         <table class="font-work inline-block md:table border-b-2 border-x-2  border-blue-600 w-max md:w-screen">
           <Tablerow>
             <Tablehead>user id</Tablehead>
@@ -375,8 +376,8 @@ export default {
             </Tabledata>
           </Tablerow>
         </table>
-      </div>    
-      </div>     
+      </div>
+    </div>
     <div class="w-full h-screen flex justify-center items-center " v-else>
       <Loading />
     </div>

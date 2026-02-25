@@ -57,7 +57,7 @@ export default {
                 <h2 class="inputname"> Password </h2>
                 <input ref="password" class="authinput" type="password" id="password">
             </label>
-            <label class="absolute right-9 top-49.5 lg:-right-12 lg:top-86 " for="seepassword">
+            <label class="absolute right-9 top-56.5 lg:-right-12 lg:top-86 " for="seepassword">
                 <i ref="eyeicon" class="bi bi-eye text-3xl relative lg:-left-20 lg:top-8 left-4 bottom-2"></i>
                 <input class="z-1000 opacity-0" @change="seepassword" type="checkbox" name="" id="seepassword">
             </label>
